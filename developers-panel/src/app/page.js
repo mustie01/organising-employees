@@ -1,6 +1,7 @@
 "use client";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import styles from "./page.module.css";
 
 export default function Home() {
   const [developers, setDevelopers] = useState([]);
@@ -11,7 +12,8 @@ export default function Home() {
   const [role, setRole] = useState("");
   const [work_location, setWork_location] = useState("");
   const [salary, setSalary] = useState("");
-  const [global, setGlobal] = useState("");
+  const [edit, setEdit] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -33,9 +35,6 @@ export default function Home() {
         break;
       case "salary":
         setSalary(value);
-        break;
-      case "blah":
-        setGlobal(value);
         break;
       default:
         break;
@@ -85,6 +84,7 @@ export default function Home() {
       );
       console.log(res);
       setDevelopers(res.data.payload);
+      setIsLoading(false);
     } catch (err) {
       console.error(err);
     }
@@ -112,7 +112,7 @@ export default function Home() {
     }
   };
 
-  const handleClick = async (e) => {
+  const handleDeleteClick = async (e) => {
     const id = e.target.value;
     try {
       const response = await axios.delete(
@@ -125,42 +125,52 @@ export default function Home() {
     }
   };
 
+  const handleEditClick = () => {
+    setEdit(!edit);
+  };
+
   return (
     <>
-      <table>
-        <thead>
-          <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>City</th>
-            <th>Role</th>
-            <th>Work Location</th>
-            <th>Salary</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {developers.map((developer, index) => (
-            <tr key={index}>
-              <td>{developer.first_name}</td>
-              <td>{developer.last_name}</td>
-              <td>{developer.city}</td>
-              <td>{developer.role}</td>
-              <td>{developer.work_location}</td>
-              <td>{developer.salary}</td>
-              <td>
-                <button value={developer.id} onClick={handleClick}>
-                  Delete
-                </button>
-              </td>
-              <td>
-                <button>Edit</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>City</th>
+                <th>Role</th>
+                <th>Work Location</th>
+                <th>Salary</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
 
+            <tbody>
+              {developers.map((developer, index) => (
+                <tr key={index}>
+                  <td>{developer.first_name}</td>
+                  <td>{developer.last_name}</td>
+                  <td>{developer.city}</td>
+                  <td>{developer.role}</td>
+                  <td>{developer.work_location}</td>
+                  <td>{developer.salary}</td>
+                  <td>
+                    <button value={developer.id} onClick={handleDeleteClick}>
+                      Delete
+                    </button>
+                  </td>
+                  <td>
+                    <button onClick={handleEditClick}>Edit</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         <ul>
           <li>
@@ -222,6 +232,7 @@ export default function Home() {
         </ul>
         <button type="submit">Add New Employee</button>
       </form>
+      {edit && <div className={styles.editbox}>Edit me bruh</div>}
     </>
   );
 }
