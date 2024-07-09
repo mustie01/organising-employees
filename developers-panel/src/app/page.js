@@ -14,6 +14,7 @@ export default function Home() {
   const [salary, setSalary] = useState("");
   const [edit, setEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [developerIdToEdit, setDeveloperIdToEdit] = useState(0);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -112,6 +113,24 @@ export default function Home() {
     }
   };
 
+  const updateDeveloper = async (developer) => {
+    try {
+      const response = await axios.patch(
+        `https://developersrestapi.onrender.com/developers/${developerIdToEdit}`,
+        developer,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Developer updated successfully:", response.data);
+      await getAllDevelopers();
+    } catch (error) {
+      console.error("Error editing developer:", error);
+    }
+  };
+
   const handleDeleteClick = async (e) => {
     const id = e.target.value;
     try {
@@ -125,8 +144,37 @@ export default function Home() {
     }
   };
 
-  const handleEditClick = () => {
+  const handleEditClick = async (e) => {
     setEdit(!edit);
+    setDeveloperIdToEdit(parseInt(e.target.value, 10));
+    console.log(developerIdToEdit);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    const developer = {};
+
+    // This will allow me to update dynamically
+    if (first_name) developer.first_name = first_name;
+    if (last_name) developer.last_name = last_name;
+    if (city) developer.city = city;
+    if (role) developer.role = role;
+    if (work_location) developer.work_location = work_location;
+    if (salary) developer.salary = salary;
+
+    await updateDeveloper(developerIdToEdit, developer);
+    console.log("Developer:", developer);
+
+    // Clear the form fields after submission
+    setFirst_name("");
+    setLast_name("");
+    setCity("");
+    setRole("");
+    setWork_location("");
+    setSalary("");
+    console.log(developerIdToEdit);
+    console.log("Is the id a number? ", typeof developerIdToEdit === "number");
+    console.log(typeof developerIdToEdit);
   };
 
   return (
@@ -163,7 +211,9 @@ export default function Home() {
                     </button>
                   </td>
                   <td>
-                    <button onClick={handleEditClick}>Edit</button>
+                    <button onClick={handleEditClick} value={developer.id}>
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -189,50 +239,97 @@ export default function Home() {
               type="text"
               id="last_name"
               name="last_name"
-              value={last_name}
               onChange={handleInputChange}
             />
           </li>
           <li>
             <label htmlFor="city">City</label>
-            <input
-              id="city"
-              name="city"
-              value={city}
-              onChange={handleInputChange}
-            />
+            <input id="city" name="city" onChange={handleInputChange} />
           </li>
           <li>
             <label htmlFor="role">Role</label>
-            <input
-              id="role"
-              name="role"
-              value={role}
-              onChange={handleInputChange}
-            />
+            <input id="role" name="role" onChange={handleInputChange} />
           </li>
           <li>
             <label htmlFor="work_location">Work Location</label>
             <input
               id="work_location"
               name="work_location"
-              value={work_location}
               onChange={handleInputChange}
             />
           </li>
           <li>
             <label htmlFor="salary">Salary</label>
-            <input
-              id="salary"
-              name="salary"
-              value={salary}
-              onChange={handleInputChange}
-            />
+            <input id="salary" name="salary" onChange={handleInputChange} />
           </li>
         </ul>
         <button type="submit">Add New Employee</button>
       </form>
-      {edit && <div className={styles.editbox}>Edit me bruh</div>}
+
+      {/* {edit && <div className={styles.editbox}>Edit me bruh</div>} */}
+      {edit && (
+        <form onSubmit={handleEditSubmit}>
+          <ul>
+            <li>
+              <label htmlFor="first_name">First Name</label>
+              <input
+                type="text"
+                id="first_name"
+                name="first_name"
+                value={first_name}
+                onChange={handleInputChange}
+              />
+            </li>
+            <li>
+              <label htmlFor="last_name">Last Name</label>
+              <input
+                type="text"
+                id="last_name"
+                name="last_name"
+                value={last_name}
+                onChange={handleInputChange}
+              />
+            </li>
+            <li>
+              <label htmlFor="city">City</label>
+              <input
+                id="city"
+                name="city"
+                value={city}
+                onChange={handleInputChange}
+              />
+            </li>
+            <li>
+              <label htmlFor="role">Role</label>
+              <input
+                id="role"
+                name="role"
+                value={role}
+                onChange={handleInputChange}
+              />
+            </li>
+            <li>
+              <label htmlFor="work_location">Work Location</label>
+              <input
+                id="work_location"
+                name="work_location"
+                value={work_location}
+                onChange={handleInputChange}
+              />
+            </li>
+            <li>
+              <label htmlFor="salary">Salary</label>
+              <input
+                id="salary"
+                name="salary"
+                value={salary}
+                onChange={handleInputChange}
+              />
+            </li>
+          </ul>
+          <button type="submit">Edit Employee</button>
+        </form>
+      )}
     </>
   );
 }
